@@ -5,7 +5,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Services.Catalog.Interface;
+using Services.Catalog.Services;
+using Services.Catalog.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +30,18 @@ namespace Services.Catalog
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<ICourseServis, CourseServer>();
+            services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
+
+            services.Configure<DatabaseSettings>(Configuration.GetSection("DatabaseSettings"));
+
+            services.AddSingleton<IDatabaseSettings>(sp =>
+            {
+                return sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Services.Catalog", Version = "v1" });
